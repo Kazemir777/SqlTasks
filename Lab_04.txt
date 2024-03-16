@@ -1,0 +1,223 @@
+Піскорський Віталій, група 12-232
+Лабораторна робота №4
+
+
+Проектування однотабличних запитів, що містять функції агрегування і групування
+1.	Вивести статистику: загальна кількість всіх книг, їх вартість, їх середню вартість, мінімальну і максимальну ціну
+SELECT 
+	COUNT(*) AS Count_of_books,
+	SUM(`Price`) AS Total_price,
+	AVG(`Price`) AS Avarage_price,
+	MIN(`Price`) AS Min_price,
+	MAX(`Price`) AS Max_price
+FROM `books`;
+
+
+2.	Вивести загальну кількість всіх книг без урахування книг з непроставленою ціною
+SELECT COUNT(*) AS Count_of_books FROM `books` WHERE `Price` IS NOT NULL;
+
+
+3.	Вивести статистику (див. 1) для книг новинка / не новинка
+SELECT 
+	`New`,
+	COUNT(*) AS Count_of_books,
+	SUM(`Price`) AS Total_price,
+	AVG(`Price`) AS Avarage_price,
+	MIN(`Price`) AS Min_price,
+	MAX(`Price`) AS Max_price
+FROM `books`
+GROUP BY `New`;
+
+
+4.	Вивести статистику (див. 1) для книг за кожним роком видання
+SELECT 
+	YEAR(`Date`) AS `Year`,
+	COUNT(*) AS Count_of_books,
+	SUM(`Price`) AS Total_price,
+	AVG(`Price`) AS Avarage_price,
+	MIN(`Price`) AS Min_price,
+	MAX(`Price`) AS Max_price
+FROM `books`
+GROUP BY `Year`;
+
+
+5.	Змінити п.4, виключивши з статистики книги з ціною від 10 до 20
+SELECT 
+	YEAR(`Date`) AS `Year`,
+	COUNT(*) AS Count_of_books,
+	SUM(`Price`) AS Total_price,
+	AVG(`Price`) AS Avarage_price,
+	MIN(`Price`) AS Min_price,
+	MAX(`Price`) AS Max_price
+FROM `books`
+WHERE `Price` < 10 OR `Price` > 20
+GROUP BY `Year`;
+
+
+6.	Змінити п.4. Відсортувати статистику по спадаючій кількості.
+SELECT 
+	YEAR(`Date`) AS `Year`,
+	COUNT(*) AS Count_of_books,
+	SUM(`Price`) AS Total_price,
+	AVG(`Price`) AS Avarage_price,
+	MIN(`Price`) AS Min_price,
+	MAX(`Price`) AS Max_price
+FROM `books`
+GROUP BY `Year`
+ORDER BY `Count_of_books` DESC;
+
+
+7.	Вивести загальну кількість кодів книг і кодів книг що не повторюються
+SELECT COUNT(`Code`) AS Count_of_codes, COUNT(DISTINCT `Code`) AS Count_of_unique_codes FROM `books`;
+
+
+8.	Вивести статистику: загальна кількість і вартість книг по першій букві її назви
+SELECT 
+	LEFT(`Title`, 1) AS First_letter_of_title, 
+	COUNT(*) AS Count_of_books, 
+	SUM(`Price`) AS Total_price
+FROM `books`
+GROUP BY First_letter_of_title;
+
+
+9.	Змінити п. 8, виключивши з статистики назви що починаються з англ. букви або з цифри.
+SELECT 
+	LEFT(`Title`, 1) AS First_letter_of_title, 
+	COUNT(*) AS Count_of_books, 
+	SUM(`Price`) AS Total_price
+FROM `books`
+WHERE `Title` NOT REGEXP '^[A-Za-z0-9]'
+GROUP BY First_letter_of_title;
+
+
+10.	Змінити п. 9 так щоб до складу статистики потрапили дані з роками більшими за 2000.
+SELECT 
+	LEFT(`Title`, 1) AS First_letter_of_title, 
+	COUNT(*) AS Count_of_books, 
+	SUM(`Price`) AS Total_price
+FROM `books`
+WHERE `Title` NOT REGEXP '^[A-Za-z0-9]' AND YEAR(`Date`) > 2000
+GROUP BY First_letter_of_title;
+
+
+11.	Змінити п. 10. Відсортувати статистику по спадаючій перших букв назви.
+SELECT 
+	LEFT(`Title`, 1) AS First_letter_of_title, 
+	COUNT(*) AS Count_of_books, 
+	SUM(`Price`) AS Total_price
+FROM `books`
+WHERE `Title` NOT REGEXP '^[A-Za-z0-9]' AND YEAR(`Date`) > 2000
+GROUP BY First_letter_of_title
+ORDER BY First_letter_of_title DESC;
+
+
+12.	Вивести статистику (див. 1) по кожному місяцю кожного року.
+SELECT 
+	YEAR(`Date`) AS `Year`,
+	MONTH(`Date`) AS `Month`,
+	COUNT(*) AS Count_of_books,
+	SUM(`Price`) AS Total_price,
+	AVG(`Price`) AS Avarage_price,
+	MIN(`Price`) AS Min_price,
+	MAX(`Price`) AS Max_price
+FROM `books`
+GROUP BY `Year`, `Month`;
+
+
+13.	Змінити п. 12 так щоб до складу статистики не увійшли дані з незаповненими датами.
+SELECT 
+	YEAR(`Date`) AS `Year`,
+	MONTH(`Date`) AS `Month`,
+	COUNT(*) AS Count_of_books,
+	SUM(`Price`) AS Total_price,
+	AVG(`Price`) AS Avarage_price,
+	MIN(`Price`) AS Min_price,
+	MAX(`Price`) AS Max_price
+FROM `books`
+WHERE `Date` IS NOT NULL
+GROUP BY `Year`, `Month`;
+
+
+14.	Змінити п. 12. Фільтр по спадаючій року і зростанню місяця.
+SELECT 
+	YEAR(`Date`) AS `Year`,
+	MONTH(`Date`) AS `Month`,
+	COUNT(*) AS Count_of_books,
+	SUM(`Price`) AS Total_price,
+	AVG(`Price`) AS Avarage_price,
+	MIN(`Price`) AS Min_price,
+	MAX(`Price`) AS Max_price
+FROM `books`
+GROUP BY `Year`, `Month`
+ORDER BY `Year` DESC, `Month` ASC;
+
+
+15.	Вивести статистику для книг новинка / не новинка: загальна ціна, загальна ціна в грн. / Євро / руб. Колонкам запиту дати назви за змістом.
+SELECT 
+	`New`,
+	SUM(`Price`) AS Total_price_USD,
+	SUM(`Price` * 38.5) AS Total_price_UAH,
+	SUM(`Price` * 1.1) AS Total_price_EUR,
+	SUM(`Price` * 92.9) AS Total_price_RUB
+FROM `books`
+GROUP BY `New`;
+
+
+16.	Змінити п. 15 так щоб виводилася округлена до цілого числа (дол. / Грн. / Євро / руб.) Ціна.
+SELECT 
+	`New`,
+	ROUND(SUM(`Price`)) AS Total_price_USD,
+	ROUND(SUM(`Price` * 38.5)) AS Total_price_UAH,
+	ROUND(SUM(`Price` * 1.1)) AS Total_price_EUR,
+	ROUND(SUM(`Price` * 92.9)) AS Total_price_RUB
+FROM `books`
+GROUP BY `New`;
+
+
+17.	Вивести статистику (див. 1) по видавництвах.
+SELECT 
+	`Publisher`,
+	COUNT(*) AS Count_of_books,
+	SUM(`Price`) AS Total_price,
+	AVG(`Price`) AS Avarage_price,
+	MIN(`Price`) AS Min_price,
+	MAX(`Price`) AS Max_price
+FROM `books`
+GROUP BY `Publisher`;
+
+
+18.	Вивести статистику (див. 1) за темами і видавництвами. Фільтр по видавництвам.
+SELECT 
+	`Publisher`,
+	`Topic`,
+	COUNT(*) AS Count_of_books,
+	SUM(`Price`) AS Total_price,
+	AVG(`Price`) AS Avarage_price,
+	MIN(`Price`) AS Min_price,
+	MAX(`Price`) AS Max_price
+FROM `books`
+GROUP BY `Publisher`;
+
+
+19.	Вивести статистику (див. 1) за категоріями, темами і видавництвами. Фільтр по видавництвам, темах, категоріям.
+SELECT 
+	`Publisher`,
+	`Topic`,
+	`Category`,
+	COUNT(*) AS Count_of_books,
+	SUM(`Price`) AS Total_price,
+	AVG(`Price`) AS Avarage_price,
+	MIN(`Price`) AS Min_price,
+	MAX(`Price`) AS Max_price
+FROM `books`
+GROUP BY `Publisher`, `Topic`, `Category`;
+
+
+20.	Вивести список видавництв, у яких округлена до цілого ціна однієї сторінки більше 10 копійок. 
+SELECT `Publisher`
+FROM `books`
+GROUP BY `Publisher`
+HAVING ROUND(AVG(`Price` / `Pages`)) > 0.10;
+
+
+
