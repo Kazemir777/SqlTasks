@@ -1,0 +1,137 @@
+Піскорський Віталій, група 12-232
+Лабораторна робота №5
+
+
+Проектування БД, нормалізація, створення таблиць (головний ключ, обмеження, зовнішній ключ, зв'язку, довідкова цілісність) і завантаження даних
+
+1.	Проаналізувати приклад універсального відношення. 
+З'ясувати які його колонки містять надлишкові дані. 
+Виконати нормалізацію універсального відношення, розбивши його на кілька таблиць.  
+
+На мою думку, для нормалізації треба зробити окремі таблиці для колонок "Видавництво", "Тема", "Категорія"
+
+
+2.	Скласти SQL-script, що виконує:
+a.	Створення таблиць бази даних. 
+Команди для створення таблиці повинні містити головний ключ, обмеження типу null / not null, default, check, створення зв'язків з умовами посилальної цілісності
+
+CREATE TABLE IF NOT EXISTS `publisher` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `Publisher` VARCHAR(100) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE TABLE IF NOT EXISTS `topic` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `Topic` VARCHAR(100) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE TABLE IF NOT EXISTS `category` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `Category` VARCHAR(100) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE TABLE IF NOT EXISTS `books` (
+    `N` INT AUTO_INCREMENT PRIMARY KEY,
+    `Code` INT UNSIGNED NOT NULL,
+    `New` ENUM('Yes', 'No') DEFAULT 'No' NOT NULL,
+    `Title` VARCHAR(255) NOT NULL,
+    `Price` FLOAT DEFAULT 0,
+    `Publisher_id` INT NOT NULL,
+    `Pages` INT UNSIGNED NOT NULL,
+    `Format` VARCHAR(20) NOT NULL DEFAULT '',
+    `Date` DATE,
+    `Circulation` INT NOT NULL,
+    `Topic_id` INT NOT NULL,
+    `Category_id` INT NOT NULL,
+	FOREIGN KEY (`Publisher_id`) REFERENCES `publisher` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,	
+	FOREIGN KEY (`Topic_id`) REFERENCES `topic` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+	FOREIGN KEY (`Category_id`) REFERENCES `category` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+
+
+b.	Завантаження даних в таблиці
+INSERT INTO `publisher` (`Publisher`) VALUES 
+	('Видавнича група BHV'),
+	('Вільямс'),
+	('МикроАрт'),
+	('DiaSoft'),
+	('ДМК'),
+	('Триумф'),
+	('Эком'),
+	('Києво-Могилянська академія'),
+	('Університет "Україна"'),
+	('Вінниця: ВДТУ');
+
+INSERT INTO `topic` (`Topic`) VALUES 
+	('Використання ПК в цілому'),
+	('Операційні системи'),
+	('Програмування');
+
+INSERT INTO `category` (`Category`) VALUES 
+	('Підручники'),
+	('Апаратні засоби ПК'),
+	('Захист і безпека ПК'),
+	('Інші книги'),
+	('Windows 2000'),
+	('Linux'),
+	('Unix'),
+	('Інші операційні системи'),
+	('C&C++'),
+	('SQL');
+	
+INSERT INTO `books` (`N`, `Code`, `New`, `Title`, `Price`, `Publisher_id`, `Pages`, `Format`, `Date`, `Circulation`, `Topic_id`, `Category_id`) VALUES 
+	(2, 5110, 'No', 'Апаратні засоби мультимедіа. Відеосистема РС', 15.51, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Видавнича група BHV'), 400, '70х100/16', '2000-07-24', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Використання ПК в цілому'), (SELECT `id` FROM `category` WHERE `Category` = 'Підручники')),
+	(8, 4985, 'No', 'Засвой самостійно модернізацію та ремонт ПК за 24 години, 2-ге вид.', 18.90, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Вільямс'), 288, '70х100/16', '2000-07-07', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Використання ПК в цілому'), (SELECT `id` FROM `category` WHERE `Category` = 'Підручники')),
+	(9, 5141, 'No', 'Структури даних та алгоритми', 37.80, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Вільямс'), 384, '70х100/16', '2000-09-29', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Використання ПК в цілому'), (SELECT `id` FROM `category` WHERE `Category` = 'Підручники')),
+	(20, 5127, 'No', 'Автоматизація інженерно-графічних робіт', 11.58, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Видавнича група BHV'), 256, '70х100/16', '2000-06-15', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Використання ПК в цілому'), (SELECT `id` FROM `category` WHERE `Category` = 'Підручники')),
+	(31, 5110, 'No', 'Апаратні засоби мультимедіа. Відеосистема РС', 15.51, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Видавнича група BHV'), 400, '70х100/16', '2000-07-24' ,5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Використання ПК в цілому'), (SELECT `id` FROM `category` WHERE `Category` = 'Апаратні засоби ПК')),
+	(46, 5199, 'No', 'Залізо IBM 2001', 30.7, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'МикроАрт'), 368, '70х100/16', '2000-02-12', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Використання ПК в цілому'), (SELECT `id` FROM `category` WHERE `Category` = 'Апаратні засоби ПК')),
+	(50, 3851, 'No', 'Захист інформації та безпека комп''ютерних систем', 26.00, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'DiaSoft'), 480, '84х108/16', NULL, 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Використання ПК в цілому'), (SELECT `id` FROM `category` WHERE `Category` = 'Захист і безпека ПК')),
+	(58, 3932, 'No', 'Як перетворити персональний комп''ютер на вимірювальний комплекс', 7.65, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'ДМК'), 144, '60х88/16', '1999-06-09', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Використання ПК в цілому'), (SELECT `id` FROM `category` WHERE `Category` = 'Інші книги')),
+	(59, 4713, 'No', 'Plug-ins. Додаткові програми для музичних програм', 11.41, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'ДМК'), 144, '70х100/16', '2000-02-22', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Використання ПК в цілому'), (SELECT `id` FROM `category` WHERE `Category` = 'Інші книги')),
+	(175, 5217, 'No', ' Windows МЕ. Найновіші версії програм', 16.57, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Триумф'), 320, '70х100/16', '2000-08-25',5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Операційні системи'), (SELECT `id` FROM `category` WHERE `Category` = 'Windows 2000')),
+	(176, 4829, 'No', 'Windows 2000 Professional крок за кроком з CD', 27.25, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Эком'), 320, '70х100/16', '2000-04-28', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Операційні системи'), (SELECT `id` FROM `category` WHERE `Category` = 'Windows 2000')),
+	(188, 5170, 'No', 'Linux версії', 24.43, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'ДМК'), 346, '70х100/16', '2000-09-29', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Операційні системи'), (SELECT `id` FROM `category` WHERE `Category` = 'Linux')),
+	(191, 860, 'No', 'Операційна система UNIX', 3.50, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Видавнича група BHV'), 395, '84х100\\16', '1997-05-05', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Операційні системи'), (SELECT `id` FROM `category` WHERE `Category` = 'Unix')),
+	(203, 44, 'No', 'Відповіді на актуальні запитання щодо OS/2 Warp', 5.00, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'DiaSoft'), 352, '60х84/16', '1996-03-20', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Операційні системи'), (SELECT `id` FROM `category` WHERE `Category` = 'Інші операційні системи')),
+	(206, 5176, 'No', 'Windows Ме. Супутник користувача', 12.79, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Видавнича група BHV'), 306, '', '2000-10-10', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Операційні системи'), (SELECT `id` FROM `category` WHERE `Category` = 'Інші операційні системи')),
+	(209, 5462, 'No', 'Мова програмування С++. Лекції та вправи', 29.00, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'DiaSoft'), 656, '84х108/16', '2000-12-12', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Програмування'), (SELECT `id` FROM `category` WHERE `Category` = 'C&C++')),
+	(210, 4982, 'No', 'Мова програмування С. Лекції та вправи', 29.00, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'DiaSoft'), 432, '84х108/16', '2000-07-12', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Програмування'), (SELECT `id` FROM `category` WHERE `Category` = 'C&C++')),
+	(220, 4687, 'No', 'Ефективне використання C++ .50 рекомендацій щодо покращення ваших програм та проектів', 17.60, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'ДМК'), 240, '70х100/16', '2000-02-03', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Програмування'), (SELECT `id` FROM `category` WHERE `Category` = 'C&C++')),
+	(222, 235, 'No', 'Інформаційні системи і структури даних', NULL, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Києво-Могилянська академія'), 288, '60х90/16', NULL, 400, (SELECT `id` FROM `topic` WHERE `Topic` = 'Використання ПК в цілому'), (SELECT `id` FROM `category` WHERE `Category` = 'Інші книги')),
+	(225, 8746, 'Yes', 'Бази даних в інформаційних системах', NULL, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Університет "Україна"'), 418, '60х84/16', '2018-07-25', 100, (SELECT `id` FROM `topic` WHERE `Topic` = 'Програмування'), (SELECT `id` FROM `category` WHERE `Category` = 'SQL')),
+	(226, 2154, 'Yes', 'Сервер на основі операційної системи FreeBSD 6.1', 0, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Університет "Україна"'), 216, '60х84/16', '2015-11-03', 500, (SELECT `id` FROM `topic` WHERE `Topic` = 'Програмування'), (SELECT `id` FROM `category` WHERE `Category` = 'Інші операційні системи')),
+	(245, 2662, 'No', 'Організація баз даних та знань', 0, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Вінниця: ВДТУ'), 208, '60х90/16', '2001-10-10', 1000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Програмування'), (SELECT `id` FROM `category` WHERE `Category` = 'SQL')),
+	(247, 5641, 'Yes', 'Організація баз даних та знань', 0, (SELECT `id` FROM `publisher` WHERE `Publisher` = 'Видавнича група BHV'), 384, '70х100/16', '2021-12-15', 5000, (SELECT `id` FROM `topic` WHERE `Topic` = 'Програмування'), (SELECT `id` FROM `category` WHERE `Category` = 'SQL'));
+
+
+3.	Побудувати діаграму зв'язків таблиць бази даних використовуючи інструмент Designer. 
+
+4.	Створити зв’язки в базі даних між таблицями. 
+a.	Вивчити роботу створення зв’язків між таблицями в полі Designer
+b.	Створити майстром e Designer кілька варіантів зв’язків у базі даних
+c.	Проаналізувати і пояснити особливості зв’язків, створених Designer
+d.	Порівняти з тими, що написані самостійно.
+e.	Зробити висновки 
+
+5.	Створити і перевірити представлення для отримання універсального відношення з набору нормалізованих таблиць бази даних.
+
+SELECT 
+    b.N,
+    b.Code,
+    b.New,
+    b.Title,
+    b.Price,
+    p.Publisher,
+    b.Pages,
+    b.Format,
+    b.Date,
+    b.Circulation,
+    t.Topic,
+    c.Category
+FROM 
+    `books` AS b
+INNER JOIN `publisher` AS p ON b.Publisher_id = p.id
+INNER JOIN `topic` AS t ON b.Topic_id = t.id
+INNER JOIN `category` AS c ON b.Category_id = c.id;
